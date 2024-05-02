@@ -85,7 +85,7 @@ def create_vel(a,b):
     vel = list(vel for vel,_ in itertools.groupby(vel))
     return vel
 
-def create_colors(vel, show_color = True):
+def create_particle_colors(vel, show_color = True):
     color = []
     if show_color == True:
         for v in vel:
@@ -109,8 +109,8 @@ def create_dir(folder_name):
         os.system(f"mkdir {folder_name}")
 
 
-def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, 
-                 show_color=True, show_plots=True, pause_length=0.1, 
+def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True, 
+                 show_plots=True, show_final_plot=True, pause_length=0.1, 
                  save_fig=False, save_reverse_frames= True, 
                  line_width=0.1, dots_per_in= 300, show_grid=False,
                  folder_name="Animate_01"):
@@ -128,7 +128,7 @@ def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10,
     for b in range(vel_i, vel_f):
         vel = create_vel(1,b)
         pos = [ [pos_x,pos_y] ] * len(vel) 
-        colors = create_colors(vel,show_color)
+        colors = create_particle_colors(vel,show_color)
         particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
         for p in particles:
             for _ in range(200):
@@ -159,7 +159,8 @@ def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10,
     copy(f"frame_{frame_num:04d}.png",f"frame_{frame_num+1:04d}.png")
     if save_reverse_frames: generate_frames_in_reverse(frame_num)
     os.chdir("..")
-    plt.show()
+
+    if show_final_plot: plt.show()
 
 def create_video(folder_name, video_name, frame_rate=1):
     folder_dir = os.path.join(os.getcwd(),folder_name)
