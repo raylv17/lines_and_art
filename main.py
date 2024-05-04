@@ -32,27 +32,48 @@ create_plot() :::
 create_video() ::: 
 """
 
+"""
+Overhaul notes:
+# create particle
+p = Particle(px,py,vx,vy)
+
+# or create a list of particles:
+vel = create_vel_directions(1,b)
+pos = [ [pos_x,pos_y] ] * len(vel) 
+particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
+
+# generate updated particles movements
+generate_reflections(p) 
+generate_hopping(p)
+
+# plotting and saving
+plot_particle_movement(p)
+
+# video
+generate_video()
+"""
+
 from DES import *
 
-# default values: 
+# default values: ( for plot_fractal() and create_video() )
 px = 0 # starting posiiton in x
 py = 0 # starting position in y
-vf = 10 # range of gradients to take
-vi = vf-1 # starting gradient
+vf = 10 # total range of gradients to take
+vi = vf-1 # starting frame to generate from
 
 # e.g.
 # vf = 3, vi = 1 ::: [ [1,1], [1,2], [1,3], [2,1], [2,3], [3,1], [3,2] ]
 # all the gradients that will be drawn from starting position (px,py)
 
 # plot_folder_name
-pname = f"Animate_f{vf-vi}_v{vf}"
+pname = f"Animate_rng{vf-vi}_vf{vf}_p{px}-{py}"
 
-# plot fractals
+# plot fractals with reflection
 plot_fractal(pos_x=px, pos_y=py, vel_i=vi, vel_f=vf, show_color=True, 
-             show_plots=False, show_final_plot=False, pause_length=1, 
-             save_fig=True, save_reverse_frames=True,
-             line_width=0.01, dots_per_in=300, show_grid=False, 
+             show_plots=False, show_final_plot=False, pause_length=1,
+             save_fig=True,
+             line_width=0.1, dots_per_in=300, show_grid=False, 
              folder_name = pname)
-# create_video(folder_name=pname, video_name=pname, frame_rate=1)
+# create_video(folder_name=pname, video_name=pname, max_range=[vi,vf], frame_rate=1)
 
 # plot path animation

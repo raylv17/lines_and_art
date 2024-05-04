@@ -18,7 +18,7 @@ class Particle:
         pos = pos
         # print("particle created")
 
-    def move(self):
+    def move_with_reflection(self):
         # check direction, set collision val.
         m = 0
         if self.v_x[-1] != 0:
@@ -63,6 +63,16 @@ class Particle:
     def current_position(self):
         return self.s_x[-1], self.s_y[-1]
     
+    # def move_with_hopping(self,direction):
+        # if direction == "+y": # up
+        #     self.s_y = self.s_y + 1
+        # elif direction == "-y": # down 
+        #     self.s_y = self.s_y - 1 
+        # elif direction == "+x": # left 
+        #     self.s_x = self.s_x + 1
+        # elif direction == "-x": # right
+        #     self.s_x = self.s_x - 1
+    
     def __repr__(self) -> str:
         global count
         count = count + 1
@@ -73,7 +83,7 @@ class Particle:
 # pos = [[0,0] for i in range(a,b) for j in range(a,b)]
 # vel = [[i,j] for i in range(a,b) for j in range(a,b)]
 
-def create_vel(a,b):
+def create_vel_directions(a,b):
     vel = [ [i,j] for i in range(a,b) for j in range(a,b)]
     # print(len(vel))
     for i in range(len(vel)):
@@ -111,8 +121,7 @@ def create_dir(folder_name):
 
 def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True, 
                  show_plots=True, show_final_plot=True, pause_length=0.1, 
-                 save_fig=False, save_reverse_frames= True, 
-                 line_width=0.1, dots_per_in= 300, show_grid=False,
+                 save_fig=False, line_width=0.1, dots_per_in= 300, show_grid=False,
                  folder_name="Animate_01"):
     create_dir(folder_name)
     fig, ax = plt.subplots()
@@ -126,7 +135,7 @@ def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True,
     if show_grid: ax.grid()
     frame_num = 0
     for b in range(vel_i, vel_f):
-        vel = create_vel(1,b)
+        vel = create_vel_directions(1,b)
         pos = [ [pos_x,pos_y] ] * len(vel) 
         colors = create_particle_colors(vel,show_color)
         particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
@@ -134,15 +143,16 @@ def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True,
             for _ in range(200):
             # print(particle)
                 try:
-                    p.move()
+                    p.move_with_reflection()
                 except Exception as e:
                     print(e)
                 
                 if (p.s_x[-1], p.s_y[-1]) in zip(p.s_x[:-1], p.s_y[:-1]):
                     break
 
-        print(f"direction: {b}, lines: {len(vel)} ")
+        print(f"\nstep: {b}/{vel_f-1}, total lines: {len(vel)} ", end="")
         for p, color in zip(particles, colors):
+            # print(f"{p.v_x[0],p.v_y[0]}", end=" ")
             for i in range(len(p.s_x) + 1):
                 ax.plot(p.s_x[i:i+2], p.s_y[i:i+2], color, linewidth=line_width)
                 ax.set_title(rf"$p_0${p.s_x[0], p.s_y[0]} | $v_0${p.v_x[0], p.v_y[0]} | #{len(vel)} | {b}")
@@ -153,21 +163,29 @@ def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True,
         if save_fig:
             frame_num = frame_num + 1
             plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
-            
+    
+    print()
     folder_dir = os.path.join(os.getcwd(),folder_name)
     os.chdir(folder_dir)
-    copy(f"frame_{frame_num:04d}.png",f"frame_{frame_num+1:04d}.png")
-    if save_reverse_frames: generate_frames_in_reverse(frame_num)
     os.chdir("..")
 
     if show_final_plot: plt.show()
 
-def create_video(folder_name, video_name, frame_rate=1):
+def create_video(folder_name, video_name, save_reverse_frames=True, max_range=[], frame_rate=1):
     folder_dir = os.path.join(os.getcwd(),folder_name)
-    print(folder_dir)
+    os.chdir(folder_dir)
+    print(os.getcwd())
+    frame_range = (max_range[-1] - max_range[0])*2
+    last_frame = [i for i in os.walk(folder_dir)][-1][-1][-1]
+    last_frame = int(last_frame.split(".")[0].split("_")[1])
+    
+    if last_frame < frame_range:
+        if save_reverse_frames: 
+            generate_frames_in_reverse(last_frame)
+        else: 
+            copy(f"frame_{last_frame:04d}.png",f"frame_{last_frame+1:04d}.png")
+
     if os.path.isdir(folder_dir):
-        os.chdir(folder_dir)
-        print(os.getcwd())
         os.system(f"ffmpeg -r {frame_rate} -i frame_%04d.png -q:v 0 {video_name}.avi -y")
     else:
         print("folder does not exist")
@@ -175,7 +193,7 @@ def create_video(folder_name, video_name, frame_rate=1):
 
 def generate_frames_in_reverse(last_frame):
     i = last_frame + 1
-    for b in range(last_frame,1,-1):
+    for b in range(last_frame,0,-1):
         # print(f"frame_{b:04d} to {i}")
         orig_forw = f"frame_{b:04d}.png"
         renm_back = f"frame_{i:04d}.png"
