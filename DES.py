@@ -76,7 +76,7 @@ class Particle:
     def __repr__(self) -> str:
         global count
         count = count + 1
-        return f"{count} | position: {self.s_x[-1]:5.2f}, {self.s_y[-1]:5.2f} | velocity: {self.v_x[-1]:5.2f}, {self.v_y[-1]:5.2f}"
+        return f"{count:3d} | position: {self.s_x[-1]:5.2f}, {self.s_y[-1]:5.2f} | velocity: {self.v_x[-1]:5.2f}, {self.v_y[-1]:5.2f}"
 
 
 # pos = [[i,j] for i,j in zip(range(1,9),range(9,1,-1))]

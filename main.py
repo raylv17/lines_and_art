@@ -58,22 +58,28 @@ from DES import *
 # default values: ( for plot_fractal() and create_video() )
 px = 0 # starting posiiton in x
 py = 0 # starting position in y
-vf = 10 # total range of gradients to take
-vi = vf-1 # starting frame to generate from
+vf = 100 # total range of gradients to take
+vi = vf - 1 # starting frame to generate from
 
-# e.g.
-# vf = 3, vi = 1 ::: [ [1,1], [1,2], [1,3], [2,1], [2,3], [3,1], [3,2] ]
-# all the gradients that will be drawn from starting position (px,py)
+# one particle
+particles = [Particle(pos = [px,py], vel= [vf, vi])]
 
-# plot_folder_name
-pname = f"Animate_rng{vf-vi}_vf{vf}_p{px}-{py}"
+# list of particles
+# vel = create_vel_directions(1,vf)
+# pos = [ [px, py] ] * len(vel)
+# particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
+print(f"num of particles : {len(particles)}")
 
-# plot fractals with reflection
-plot_fractal(pos_x=px, pos_y=py, vel_i=vi, vel_f=vf, show_color=True, 
-             show_plots=False, show_final_plot=False, pause_length=1,
-             save_fig=True,
-             line_width=0.1, dots_per_in=300, show_grid=False, 
-             folder_name = pname)
-# create_video(folder_name=pname, video_name=pname, max_range=[vi,vf], frame_rate=1)
+def all_move(particles, num_of_collisions=1):
+    for p in particles:
+        for _ in range(num_of_collisions):
+         p.move_with_reflection()
 
-# plot path animation
+all_move(particles,1000)
+
+fig, ax = plt.subplots()
+for p in particles:
+    plt.plot(p.s_x,p.s_y)
+    
+
+plt.show()
