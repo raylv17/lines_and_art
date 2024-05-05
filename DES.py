@@ -5,16 +5,18 @@ import itertools
 import os
 from shutil import copy
 
+count = 0
 worldmin = [0,0]
 worldmax = [10,10]
-count = 0
-
 class Particle:
     def __init__(self, pos, vel=[1,1]):
         self.s_x = [pos[0]]
         self.s_y = [pos[1]]
         self.v_x = [vel[0]]
         self.v_y = [vel[1]]
+        self.color = "k"
+        self.worldmin = [worldmin[0],worldmin[1]]
+        self.worldmax = [worldmax[0],worldmax[1]]
         pos = pos
         # print("particle created")
 
@@ -24,17 +26,17 @@ class Particle:
         if self.v_x[-1] != 0:
             m = self.v_y[-1] / self.v_x[-1]
         if m > 0 and self.v_y[-1] >= 0:
-            x_wall = worldmax[0] # L 
-            y_wall = worldmax[1] # L 
+            x_wall = self.worldmax[0] # L 
+            y_wall = self.worldmax[1] # L 
         elif m < 0 and self.v_y[-1] >= 0:
-            x_wall = worldmin[0] # 0
-            y_wall = worldmax[1] # L
+            x_wall = self.worldmin[0] # 0
+            y_wall = self.worldmax[1] # L
         elif m > 0 and self.v_y[-1] <= 0:
-            x_wall = worldmin[0] # 0 
-            y_wall = worldmin[1] # 0
+            x_wall = self.worldmin[0] # 0 
+            y_wall = self.worldmin[1] # 0
         elif m < 0 and self.v_y[-1] <= 0:
-            x_wall = worldmax[0] # L
-            y_wall = worldmin[1] # 0
+            x_wall = self.worldmax[0] # L
+            y_wall = self.worldmin[1] # 0
         else:
             raise Exception("no collision")
             return self.s_x[-1], self.s_y[-1]
@@ -78,12 +80,7 @@ class Particle:
         count = count + 1
         return f"{count:3d} | position: {self.s_x[-1]:5.2f}, {self.s_y[-1]:5.2f} | velocity: {self.v_x[-1]:5.2f}, {self.v_y[-1]:5.2f}"
 
-
-# pos = [[i,j] for i,j in zip(range(1,9),range(9,1,-1))]
-# pos = [[0,0] for i in range(a,b) for j in range(a,b)]
-# vel = [[i,j] for i in range(a,b) for j in range(a,b)]
-
-def create_vel_directions(a,b):
+def create_vel_directions_sorted_ascending(a,b):
     vel = [ [i,j] for i in range(a,b) for j in range(a,b)]
     # print(len(vel))
     for i in range(len(vel)):
@@ -95,22 +92,52 @@ def create_vel_directions(a,b):
     vel = list(vel for vel,_ in itertools.groupby(vel))
     return vel
 
-def create_particle_colors(vel, show_color = True):
-    color = []
-    if show_color == True:
-        for v in vel:
-            if v[0] % 2 == 0:
-                color.append("r") # r
-            else:
-                if v[1] % 2 == 0:
-                    color.append("g") # g
-                else: 
-                    color.append("k") # k
-    else:
-        for v in vel:
-            color.append("k")
+def create_vel_directions_sorted_triangular(range):
+    new_vel = []
+    i = 1
+    while i < range:
+        j = 1
+        while j <= i:
+            if not (list(Fraction(i,j).as_integer_ratio()) in new_vel):
+                if i != j:
+                    new_vel.append([j,i])
+                    new_vel.append([i,j])
+                else:
+                    new_vel.append([i,j])
+            # print(i,j)
+            j = j + 1
+        i = i + 1
+    return new_vel   
 
-    return color
+def all_move_with_reflection(particles, num_of_collisions=1):
+    for p in particles:
+        for _ in range(num_of_collisions):
+            p.move_with_reflection()
+            # 2 is equal to 2.002 (close numbers are assumed as equal)
+            if (round(p.s_x[-1],2) == p.s_x[0] and round(p.s_y[-1],2) == p.s_y[0]):
+                # print(f"{p.s_x[-1]} :ro: {round(p.s_x[-1],3)} :co: {p.s_x[0]} ")
+                # print(f"{p.s_y[-1]} :ro: {round(p.s_y[-1],3)} :co: {p.s_y[0]} ")
+                break
+
+def show_max_wall_collisions(particles,get=False):
+    max_col = 0
+    for p in particles:
+        if max_col < len(p.s_x):
+            max_col = len(p.s_x)
+    print(f"max wall collisions: {max_col}")
+    if get: return max_col
+    
+
+def set_color(particles, show_color=True, colors=["r","g","k"]):
+    if show_color:
+        for p in particles:
+            if p.v_x[0] % 2 == 0:
+                p.color = colors[0] # r
+            else:
+                if p.v_y[0] % 2 == 0:
+                    p.color = colors[1] # g
+                else:
+                    p.color = colors[2] # k
 
 def create_dir(folder_name):
     path = os.getcwd()
@@ -118,57 +145,46 @@ def create_dir(folder_name):
     if not os.path.isdir(folder_dir):
         os.system(f"mkdir {folder_name}")
 
-
-def plot_fractal(pos_x=0, pos_y=0, vel_i=1, vel_f=10, show_color=True, 
-                 show_plots=True, show_final_plot=True, pause_length=0.1, 
-                 save_fig=False, line_width=0.1, dots_per_in= 300, show_grid=False,
-                 folder_name="Animate_01"):
-    create_dir(folder_name)
+def gen_plot(particles, show_grid=True, show_color=True, 
+             colors=["r","g","k"], line_width=0.1,
+             show_every_single_collision=False, save_every_single_collision=False,
+             show_wall_collision=False, save_wall_collision=False,
+             pause_time=0.1, show_final_plot=True,
+             save_final_plot=False, folder_name="untitled", dots_per_in=300):
+    if show_color: set_color(particles, show_color, colors)
     fig, ax = plt.subplots()
-    print(f"first_direction: (1,{vel_i})")
-    print(f"final_direction: (1,{vel_f})")
-    print(f"initital_position : ({pos_x},{pos_y})")
-
     ax.set_xlim([worldmin[0], worldmax[0]])
     ax.set_ylim([worldmin[1], worldmax[1]])
-    ax.set_aspect('equal')
+    ax.set_aspect('equal') 
     if show_grid: ax.grid()
+    if save_final_plot or save_wall_collision or save_every_single_collision:
+        create_dir(folder_name)
     frame_num = 0
-    for b in range(vel_i, vel_f):
-        vel = create_vel_directions(1,b)
-        pos = [ [pos_x,pos_y] ] * len(vel) 
-        colors = create_particle_colors(vel,show_color)
-        particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
-        for p in particles:
-            for _ in range(200):
-            # print(particle)
-                try:
-                    p.move_with_reflection()
-                except Exception as e:
-                    print(e)
-                
-                if (p.s_x[-1], p.s_y[-1]) in zip(p.s_x[:-1], p.s_y[:-1]):
-                    break
-
-        print(f"\nstep: {b}/{vel_f-1}, total lines: {len(vel)} ", end="")
-        for p, color in zip(particles, colors):
-            # print(f"{p.v_x[0],p.v_y[0]}", end=" ")
+    count = 0
+    for p in particles:
+        count = count + 1
+        if show_every_single_collision:
             for i in range(len(p.s_x) + 1):
-                ax.plot(p.s_x[i:i+2], p.s_y[i:i+2], color, linewidth=line_width)
-                ax.set_title(rf"$p_0${p.s_x[0], p.s_y[0]} | $v_0${p.v_x[0], p.v_y[0]} | #{len(vel)} | {b}")
-        if show_plots:
-            plt.pause(pause_length)
-
-        # plot save:
-        if save_fig:
-            frame_num = frame_num + 1
-            plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
+                ax.set_title(f"{p.v_x[0],p.v_y[0]} | {count} | #lines: {len(particles)}") 
+                plt.plot(p.s_x[i:i+2],p.s_y[i:i+2], p.color)
+                plt.pause(pause_time)
+                if save_every_single_collision:
+                    frame_num = frame_num + 1
+                    plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
+        else:
+            ax.set_title(f"{p.v_x[0],p.v_y[0]} | {count} | #lines: {len(particles)}") 
+            plt.plot(p.s_x, p.s_y, p.color, linewidth=line_width)
+            if show_wall_collision: 
+                plt.pause(pause_time)
+            if save_wall_collision:
+                frame_num = frame_num + 1
+                plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
     
-    print()
-    folder_dir = os.path.join(os.getcwd(),folder_name)
-    os.chdir(folder_dir)
-    os.chdir("..")
-
+    ax.set_title(f"#lines: {len(particles)}") 
+    if save_final_plot:
+        frame_num = frame_num + 1
+        plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
+    
     if show_final_plot: plt.show()
 
 def create_video(folder_name, video_name, save_reverse_frames=True, max_range=[], frame_rate=1):
@@ -199,3 +215,14 @@ def generate_frames_in_reverse(last_frame):
         renm_back = f"frame_{i:04d}.png"
         copy(orig_forw, renm_back)
         i = i + 1
+
+if __name__ == "__main__":
+    # one particle movement
+    particles = []
+    particles.append(Particle(pos=[0,0], vel=[1,2]))
+    particles.append(Particle(pos=[0,0], vel=[2,1]))
+    particles.append(Particle(pos=[0,0], vel=[1,3]))
+    all_move_with_reflection(particles, 100)
+    gen_plot(particles, show_color=True)
+    plt.show()
+    

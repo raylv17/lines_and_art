@@ -4,6 +4,7 @@
 """ 
 Program inspired by the DES (Discrete Event Simulation) approach (in contract to continuous simulations that uses time_stepping)
 
+# Move with Reflection: 
 A line with a given starting position (px,py) and slope is drawn in a finite world. Collision on the walls will result in the change of slope of the line.
 examples:
 1) [+m,+vy] -> wall(x=10) => [-m,+vy]
@@ -22,8 +23,10 @@ Function Explanation:
 
 def plot_fractal() ::: lines and their reflections are plotted from a given starting position (px,py) and a range of slopes [vi,vf]
 
+"""
 
-Changes to make:
+"""
+Changes to make: [DONE]
 # Make smaller functions for single (or few) lines that animates each collision
 def animate_line() ::: single lines reflections, given starting position (x,y), slope (vi,vf), number of collisions (range)
 def animate_lines() :::
@@ -33,7 +36,7 @@ create_video() :::
 """
 
 """
-Overhaul notes:
+Overhaul notes: [DONE]
 # create particle
 p = Particle(px,py,vx,vy)
 
@@ -44,7 +47,6 @@ particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
 
 # generate updated particles movements
 generate_reflections(p) 
-generate_hopping(p)
 
 # plotting and saving
 plot_particle_movement(p)
@@ -53,33 +55,46 @@ plot_particle_movement(p)
 generate_video()
 """
 
+"""
+Hopping!
+all_move_with_hopping(p,hopping_step)
+"""
+
 from DES import *
 
 # default values: ( for plot_fractal() and create_video() )
 px = 0 # starting posiiton in x
 py = 0 # starting position in y
-vf = 100 # total range of gradients to take
-vi = vf - 1 # starting frame to generate from
 
-# one particle
-particles = [Particle(pos = [px,py], vel= [vf, vi])]
+# [For single particle]
+# slope (y/x)
+# starting frame to generate from
+# vx = 1
+# vy = 15 
+# dirname = f"Plots_vx{vx}-vy{vy}_p{px}-{py}"
+# particles = [Particle(pos = [px,py], vel= [vf, vi])]
 
-# list of particles
-# vel = create_vel_directions(1,vf)
-# pos = [ [px, py] ] * len(vel)
-# particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
+# [for many particles] total range of gradients to take 
+slope_range = 16 
+dirname = f"Plots_rng{slope_range}_p{px}-{py}"
+
+# many particles [list] ## Default Program, generates Fractal?
+vel = create_vel_directions_sorted_triangular(slope_range) 
+# vel = create_vel_directions_sorted_ascending(1,slope_range)
+pos = [ [px, py] ] * len(vel)
+particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
+
+
+all_move_with_reflection(particles,500)
 print(f"num of particles : {len(particles)}")
+show_max_wall_collisions(particles)
 
-def all_move(particles, num_of_collisions=1):
-    for p in particles:
-        for _ in range(num_of_collisions):
-         p.move_with_reflection()
 
-all_move(particles,1000)
+gen_plot(particles, show_grid=False, show_color=True, 
+         colors=["r","g","k"], line_width=0.1,
+         show_wall_collision=False, show_final_plot=True, pause_time=0.1,
+         save_wall_collision=False, save_final_plot=False, dots_per_in=200, 
+         folder_name=dirname)
 
-fig, ax = plt.subplots()
-for p in particles:
-    plt.plot(p.s_x,p.s_y)
-    
-
-plt.show()
+# create_video(dirname,video_name="Colored",save_reverse_frames=False,frame_rate=12, 
+#              max_range=[1, len(particles)])
