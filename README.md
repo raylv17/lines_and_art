@@ -22,7 +22,7 @@ default program ::: generates lines and their reflections are plotted from a giv
 
 ![](https://i.imgur.com/P5FOlXF.gif)
 
-If done for many lines (or particles in the program) with given range of slopes, then the resulting plot is a fractal!
+If done for many lines (or `particles` as they are called in the program) with given range of slopes, then the resulting plot is a fractal!
 
 ![](Examples/Many_Range/frame_0259.png)
 
