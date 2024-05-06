@@ -63,22 +63,22 @@ gen_plot(particles, show_grid=True, show_color=True,
 
 Different arguments `gen_plot()` are used based on its use-case.
 `gen_plot()` will show and save the plots, the following arguments are briefed:
-	- `show_color`: assign color to the lines based on which corner it would end up when started from `(px,py) = (0,0)`, the colors are `red, green, and black`
-	- `color`: allows to assign different colors to the lines
-	- `line_width`: set thickness of the lines
-	- `show_every_single_collsion`:  recommended for `single_direction`, shows one collision per frame for one particle
-	- `show_wall_collision`: shows all wall collisions per frame for a single particle 
-	- `show_final_plot`: show all collisions for all particles
-	- `save_every_single_collsion`:  recommended for `single_direction`, save one collision per frame for one particle
-	- `save_wall_collision`: save all wall collisions per frame for a single particle 
-	- `save_final_plot`: save all collisions for all particles
-	- `pause_time`: relevant when `show_wall_collision` or `show_every_single_collision` arguments are `True`, time interval between each frame to show
-	- `dots_per_in`: set dpi for saved plots
+ - `show_color`: assign color to the lines based on which corner it would end up when started from `(px,py) = (0,0)`, the colors are `red, green, and black`
+ - `color`: allows to assign different colors to the lines
+ - `line_width`: set thickness of the lines
+ - `show_every_single_collsion`:  recommended for `single_direction`, shows one collision per frame for one particle
+ - `show_wall_collision`: shows all wall collisions per frame for a single particle
+ - `show_final_plot`: show all collisions for all particles
+ - `save_every_single_collsion`:  recommended for `single_direction`, save one collision per frame for one particle
+ - `save_wall_collision`: save all wall collisions per frame for a single particle
+ - `save_final_plot`: save all collisions for all particles
+ - `pause_time`: relevant when `show_wall_collision` or `show_every_single_collision` arguments are `True`, time interval between each frame to show
+ - `dots_per_in`: set dpi for saved plots
 
 ```python
 create_video(dirname,video_name=f"Video_{dirname}",save_reverse_frames=False,frame_rate=5, max_range=[1, len(particles)])
 ```
 `create_video()` generates a video of the saved frames from `gen_plot()`
-	- `save_reverse_frames`: creates a copy of all the frames in reverse order
-	- `frame_rate`: set frames per second 
-	- `max_range`: determines the max number of frames (including the reverse), it is used as a preventive measure for it not produce any more frames than necessary
+ - `save_reverse_frames`: creates a copy of all the frames in reverse order
+ - `frame_rate`: set frames per second
+ - `max_range`: determines the max number of frames (including the reverse), it is used as a preventive measure for it not produce any more frames than necessary
