@@ -14,7 +14,7 @@ class Particle:
         self.s_y = [pos[1]]
         self.v_x = [vel[0]]
         self.v_y = [vel[1]]
-        self.color = "k"
+        self.color = "b"
         self.worldmin = [worldmin[0],worldmin[1]]
         self.worldmax = [worldmax[0],worldmax[1]]
         pos = pos
@@ -109,14 +109,19 @@ def create_vel_directions_sorted_triangular(range):
         i = i + 1
     return new_vel   
 
-def all_move_with_reflection(particles, num_of_collisions=1):
+def all_move_with_reflection(particles, num_of_collisions=1, precision=10):
     for p in particles:
+        x_list = []
+        y_list = []
         for _ in range(num_of_collisions):
+            x_list.append(round(p.s_x[-1],precision))
+            y_list.append(round(p.s_y[-1],precision))
             p.move_with_reflection()
             # 2 is equal to 2.002 (close numbers are assumed as equal)
-            if (round(p.s_x[-1],2) == p.s_x[0] and round(p.s_y[-1],2) == p.s_y[0]):
-                # print(f"{p.s_x[-1]} :ro: {round(p.s_x[-1],3)} :co: {p.s_x[0]} ")
+            if (round(p.s_x[-1],precision),round(p.s_y[-1],precision)) in zip(x_list,y_list):
                 # print(f"{p.s_y[-1]} :ro: {round(p.s_y[-1],3)} :co: {p.s_y[0]} ")
+                # p.s_x.pop()
+                # p.s_y.pop()
                 break
 
 def show_max_wall_collisions(particles,get=False):
@@ -147,7 +152,7 @@ def create_dir(folder_name):
 
 def gen_plot(particles, show_grid=True, show_color=True, 
              colors=["r","g","k"], line_width=0.1,
-             show_every_single_collision=False, save_every_single_collision=False,
+             show_single_collision=False, save_every_single_collision=False,
              show_wall_collision=False, save_wall_collision=False,
              pause_time=0.1, show_final_plot=True,
              save_final_plot=False, folder_name="untitled", dots_per_in=300):
@@ -163,10 +168,12 @@ def gen_plot(particles, show_grid=True, show_color=True,
     count = 0
     for p in particles:
         count = count + 1
-        if show_every_single_collision:
-            for i in range(len(p.s_x) + 1):
-                ax.set_title(f"{p.v_x[0],p.v_y[0]} | {count} | #lines: {len(particles)}") 
-                plt.plot(p.s_x[i:i+2],p.s_y[i:i+2], p.color)
+        if show_single_collision:
+            col_count = 0
+            for i in range(len(p.s_x)):
+                col_count = col_count + 1
+                ax.set_title(f"{p.v_x[0],p.v_y[0]} | {col_count} | #collisions: {len(p.s_x)}") 
+                plt.plot(p.s_x[i:i+2],p.s_y[i:i+2], p.color, linewidth=line_width)
                 plt.pause(pause_time)
                 if save_every_single_collision:
                     frame_num = frame_num + 1
@@ -180,7 +187,7 @@ def gen_plot(particles, show_grid=True, show_color=True,
                 frame_num = frame_num + 1
                 plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
     
-    ax.set_title(f"#lines: {len(particles)}") 
+    ax.set_title(fr"$p_0${p.s_x[0],p.s_y[0]} | #lines: {len(particles)}") 
     if save_final_plot:
         frame_num = frame_num + 1
         plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)

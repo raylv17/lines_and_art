@@ -1,0 +1,29 @@
+
+05.05.2024 - Overhaul-1:
+    - Overhaul complete.  
+    - Generate Fractal function replaced with smaller functions with more customizability   
+    - Fractal can be generated faster for larger ranges as well   
+    - Many Particle and Single Particle collision   
+    - Plots can be generated for every_single_collision and every_wall_collision    
+    - Plots can be saved for each frame   
+    - Range of gradients are sorted:
+        1. based on the triangular matrix arrangement
+            [1,1] [1,2] [2,1] [1,3] [3,1] [2,3] [3,2] .. []
+        2. based on ascending order of the x-coordinate
+            [1,1] [1,2] [1,3] [2,1] [2,3] [3,1] [3,2] .. []
+    - Added video generator function
+    - Added Color customizablilty for plots
+
+05.05.2024 - Merged with Master
+    - Created different main file for:
+         - Many Particles - Given a slope-range
+         - Single Particle - With given range
+    - Precision argument added for collision (so repeated collisions are discarded)
+
+Thoughts:
+    - to add "all_hop" function OR "normal_to_gradient"
+
+06.05.2024:
+    - added info to README.md
+    - created Examples/ 
+     
