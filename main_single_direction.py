@@ -39,23 +39,24 @@ all_move_with_hopping(p,hopping_step)
 from DES import *
 
 # default values: ( for plot_fractal() and create_video() )
-px = 1   # starting posiiton in x
-py = 0 # starting position in y
-vx = 9 # x component of direction
-vy = 8 # y component of direction
-dirname = f"Plots_vx{vx}-vy{vy}_p{px}-{py}"
+px = [0,0,0]   # starting posiiton in x
+py = [0,0,0] # starting position in y
+vx = [5,1,4] # x component of direction
+vy = [2,3,5] # y component of direction
+dirname = f"Plots_vx{vx[0]}-vy{vy[0]}_p{px[0]}-{py[0]}"
 
 # Default program for single particle
-particles = [Particle(pos = [px,py], vel= [vx, vy])]
+particles = [Particle(pos = [px[i],py[i]], vel= [vx[i], vy[i]]) for i in range(len(px[:]))]
 all_move_with_reflection(particles,500)
-show_max_wall_collisions(particles)
+print_max_wall_collisions(particles)
 
 # for single_direction plots
-gen_plot(particles, show_grid=True, show_color=True, line_width=1, pause_time=0.1,
-         show_single_collision=True, save_every_single_collision=False,
-                show_final_plot=True,             save_final_plot=False, 
+gen_plot(particles, show_grid=True, show_color=True, line_width=1,
+         pause_time=0.2, clear_plot=True,
+         show_single_collision=True , save_single_collision=False,
+         show_final_plot      =True , save_final_plot=False,
          dots_per_in=200, 
          folder_name=dirname)
 
-# create_video(dirname,video_name=f"Video_{dirname}",save_reverse_frames=False,frame_rate=5, 
+# create_video(dirname,video_name=f"Video_{dirname}",save_reverse_frames=False,frame_rate=15, 
 #              max_range=[1, len(particles)])

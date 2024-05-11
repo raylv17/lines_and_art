@@ -14,14 +14,14 @@ class Particle:
         self.s_y = [pos[1]]
         self.v_x = [vel[0]]
         self.v_y = [vel[1]]
-        self.color = "b"
+        self.color = "k"
         self.worldmin = [worldmin[0],worldmin[1]]
         self.worldmax = [worldmax[0],worldmax[1]]
         pos = pos
         # print("particle created")
 
     def move_with_reflection(self):
-        # check direction, set collision val.
+        # check direction, set possible wall collisions.
         m = 0
         if self.v_x[-1] != 0:
             m = self.v_y[-1] / self.v_x[-1]
@@ -41,13 +41,15 @@ class Particle:
             raise Exception("no collision")
             return self.s_x[-1], self.s_y[-1]
         
-            
+        # set collision location on the wall 
         y_temp = (  m  *(x_wall - self.s_x[-1]) + self.s_y[-1])
         x_temp = ((1/m)*(y_wall - self.s_y[-1]) + self.s_x[-1])
         dist_xwall = ( (x_wall - self.s_x[-1])**2 + (y_temp - self.s_y[-1])**2 )**(1/2) # hits x = 0 or x = L
         dist_ywall = ( (x_temp - self.s_x[-1])**2 + (y_wall - self.s_y[-1])**2 )**(1/2) # hits y = 0 or y = L
         # x_temp = abs(x_temp)
         # y_temp = abs(y_temp)
+
+        # check the closest wall collisions (can be simplified?)
         if (dist_xwall <= dist_ywall):
             self.s_x.append(x_wall)
             self.s_y.append(y_temp)
@@ -124,7 +126,8 @@ def all_move_with_reflection(particles, num_of_collisions=1, precision=10):
                 # p.s_y.pop()
                 break
 
-def show_max_wall_collisions(particles,get=False):
+def print_max_wall_collisions(particles,get=False):
+    # checks the total collisions for each particle, displays the max number of collisions.
     max_col = 0
     for p in particles:
         if max_col < len(p.s_x):
@@ -151,62 +154,77 @@ def create_dir(folder_name):
         os.system(f"mkdir {folder_name}")
 
 def gen_plot(particles, show_grid=True, show_color=True, 
-             colors=["r","g","k"], line_width=0.1,
-             show_single_collision=False, save_every_single_collision=False,
+             colors=["r","g","k"], line_width=0.1, clear_plot=False,
+             show_single_collision=False, save_single_collision=False,
              show_wall_collision=False, save_wall_collision=False,
              pause_time=0.1, show_final_plot=True,
              save_final_plot=False, folder_name="untitled", dots_per_in=300):
     if show_color: set_color(particles, show_color, colors)
-    fig, ax = plt.subplots()
-    ax.set_xlim([worldmin[0], worldmax[0]])
-    ax.set_ylim([worldmin[1], worldmax[1]])
-    ax.set_aspect('equal') 
-    if show_grid: ax.grid()
-    if save_final_plot or save_wall_collision or save_every_single_collision:
+    
+    
+    if save_final_plot or save_wall_collision or save_single_collision:
         create_dir(folder_name)
     frame_num = 0
+    fig, ax = plt.subplots()
     count = 0
     for p in particles:
+        if clear_plot: plt.cla()
+        ax.grid(visible=show_grid)
+        ax.set_xlim([worldmin[0], worldmax[0]])
+        ax.set_ylim([worldmin[1], worldmax[1]])
+        ax.set_aspect('equal') 
         count = count + 1
-        if show_single_collision:
+        if show_single_collision or save_single_collision:
             col_count = 0
             for i in range(len(p.s_x)):
+                # ax.set_title(f"{p.v_x[0],p.v_y[0]} | {col_count} | #collisions: {len(p.s_x)-1}") 
+                ax.set_title(fr"$v_0${p.v_x[0],p.v_y[0]} | {col_count}") 
                 col_count = col_count + 1
-                ax.set_title(f"{p.v_x[0],p.v_y[0]} | {col_count} | #collisions: {len(p.s_x)}") 
                 plt.plot(p.s_x[i:i+2],p.s_y[i:i+2], p.color, linewidth=line_width)
-                plt.pause(pause_time)
-                if save_every_single_collision:
+                if show_single_collision: plt.pause(pause_time)
+                if save_single_collision:
                     frame_num = frame_num + 1
                     plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
         else:
-            ax.set_title(f"{p.v_x[0],p.v_y[0]} | {count} | #lines: {len(particles)}") 
+            ax.set_title(f"$v_0${p.v_x[0],p.v_y[0]} | {count} | #lines: {len(particles)}") 
             plt.plot(p.s_x, p.s_y, p.color, linewidth=line_width)
             if show_wall_collision: 
                 plt.pause(pause_time)
             if save_wall_collision:
                 frame_num = frame_num + 1
                 plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
-    
-    ax.set_title(fr"$p_0${p.s_x[0],p.s_y[0]} | #lines: {len(particles)}") 
+        ax.set_title(fr"$p_0${p.s_x[0],p.s_y[0]} | #lines: {len(particles)}") 
     if save_final_plot:
         frame_num = frame_num + 1
         plt.savefig(os.path.join(folder_name,f"frame_{frame_num:04d}"),dpi=dots_per_in)
     
-    if show_final_plot: plt.show()
+    if show_final_plot:
+        ax.set_title(fr"#lines: {len(particles)}") 
+        plt.show()
 
 def create_video(folder_name, video_name, save_reverse_frames=True, max_range=[], frame_rate=1):
     folder_dir = os.path.join(os.getcwd(),folder_name)
     os.chdir(folder_dir)
     print(os.getcwd())
     frame_range = (max_range[-1] - max_range[0])*2
-    last_frame = [i for i in os.walk(folder_dir)][-1][-1][-1]
+    for i,j,k in os.walk(folder_dir,topdown=False):
+        if not("frame" in k[0]):
+            k = k[1:]
+        elif not("frame" in k[-1]):
+            k = k[:-1]
+        else:
+            print("no last frame found\nremove videos files, keep only frames")
+        last_frame = k[-1]
+        print(last_frame)
+
+    # last_frame = [i for i in os.walk(folder_dir)][-1][-1][-1]
     last_frame = int(last_frame.split(".")[0].split("_")[1])
     
-    if last_frame < frame_range:
-        if save_reverse_frames: 
-            generate_frames_in_reverse(last_frame)
-        else: 
-            copy(f"frame_{last_frame:04d}.png",f"frame_{last_frame+1:04d}.png")
+    if (last_frame < frame_range) and (save_reverse_frames): 
+        copy(f"frame_{last_frame:04d}.png",f"frame_{last_frame+1:04d}.png")
+        generate_frames_in_reverse(last_frame)
+        
+            
 
     if os.path.isdir(folder_dir):
         os.system(f"ffmpeg -r {frame_rate} -i frame_%04d.png -q:v 0 {video_name}.avi -y")

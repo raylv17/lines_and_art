@@ -65,7 +65,7 @@ from DES import *
 # default values: ( for plot_fractal() and create_video() )
 px = 0 # starting posiiton in x
 py = 0 # starting position in y
-slope_range = 21 # total range of gradients to take 
+slope_range = 13 # total range of gradients to take 
 dirname = f"Plots_rng{slope_range}_p{px}-{py}"
 
 # Default program for many particles
@@ -76,13 +76,13 @@ particles = [Particle(pos[i], vel[i]) for i in range(len(pos))]
 
 all_move_with_reflection(particles,500, precision=1)
 print(f"num of particles : {len(particles)}")
-show_max_wall_collisions(particles)
+print_max_wall_collisions(particles)
 
 # for many directions plot 
-gen_plot(particles, show_grid=True, show_color=True, 
-         colors=["r","g","k"], line_width=0.1,
-         show_single_collision=True,
-         show_wall_collision=True, show_final_plot=True, pause_time=0.001,
+gen_plot(particles, show_grid=True, show_color=True, clear_plot=False,
+         colors=["r","g","k"], line_width=0.5,
+        #  show_single_collision=False, save_single_collision=True,
+         show_wall_collision=True, show_final_plot=True, pause_time=0.01,
          save_wall_collision=False, save_final_plot=False, dots_per_in=200, 
          folder_name=dirname)
 
