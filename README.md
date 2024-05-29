@@ -1,7 +1,7 @@
 # Lines and Art
-Program inspired by the DES (Discrete Event Simulation) approach (in contract to continuous simulations that uses time_stepping)
+Program inspired by the DES (Discrete Event Simulation) approach (in contract to continuous simulations that uses time_stepping). 
 
-## Move with Reflection: 
+### Move with Reflection: 
 A line with a given starting position (px,py) and slope is drawn in a finite world. Collision on the walls will result in the change of slope of the line.
 examples:
 1) [+m,+vy] -> wall(x=10) => [-m,+vy]
@@ -25,6 +25,10 @@ default program ::: generates lines and their reflections are plotted from a giv
 If done for many lines (or `particles` as they are called in the program) with given range of slopes, then the resulting plot is a fractal!
 
 ![](Examples/Many_Range/frame_0259.png)
+
+### Video (YouTube)
+With more engaging explanation.
+[![Video](https://i.ytimg.com/vi/daxlV2cjuKw/maxresdefault.jpg)](https://www.youtube.com/watch?v=daxlV2cjuKw "Making Art from Lines and Reflections")
 
 ## Files
 
